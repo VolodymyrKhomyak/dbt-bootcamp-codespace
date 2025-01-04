@@ -1,0 +1,17 @@
+version: 2
+
+exposures:
+  - name: executive_dashboard
+    label: Executive Dashboard
+    type: dashboard
+    maturity: low
+    url: https://a4d2df58.us1a.app.preset.io/superset/dashboard/8/?edit=true&native_filters_key=JPaU8VzYrcDiX1PepF6CPmQS-mtuew-lBvnn7HMc1K0jlBNgRihH0UxikVNJ-ak9
+    description: Executive Dashboard about Airbnb listings and hosts
+
+    depends_on:
+      - ref('dim_listings_w_hosts')
+      - ref('mart_fullmoon_reviews')
+
+    owner:
+      name: Volodymyr Khomiak
+      email: volodymyr.khomiak@capgemini.com
