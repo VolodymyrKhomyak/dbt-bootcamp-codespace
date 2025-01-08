@@ -22,11 +22,8 @@ models:
       - name: room_type
         description: Type of the apartment / room
         tests:
-          - accepted_values: 
-              values: ['Entire home/apt',
-                       'Private room',
-                       'Shared room',
-                       'Hotel room']
+          - accepted_values:
+              values: [ 'Entire home/apt', 'Private room', 'Shared room', 'Hotel room' ]
       - name: minimum_nights
         description: '{{ doc("dim_listing_cleansed__minimum_nights") }}'
         tests:
@@ -51,7 +48,7 @@ models:
         description: Defines whether the hosts is a superhost.
         tests:
           - accepted_values:
-              values: ['t', 'f']
+              values: [ 't', 'f' ]
 
   - name: dim_listings_w_hosts
     tests:
@@ -63,7 +60,7 @@ models:
           - dbt_expectations.expect_column_values_to_be_of_type:
               column_type: number
           - dbt_expectations.expect_column_quantile_values_to_be_between:
-              quantile: .99
+              quantile: 0.99
               min_value: 50
               max_value: 500
           - dbt_expectations.expect_column_max_to_be_between:
@@ -87,4 +84,31 @@ models:
       - name: review_sentiment
         tests:
           - accepted_values:
-              values: ['positive', 'neutral', 'negative']
+              values: [ 'positive', 'neutral', 'negative' ]
+
+  - name: mart_fullmoon_reviews
+    description: The 'mart_fullmoon_reviews' model is a comprehensive dataset that combines review data from Airbnb with full moon dates. It is created by joining the 'fct_reviews' table, which contains Airbnb review data, with the 'seed_full_moon_dates' table, which contains dates of full moons. The model includes all columns from the 'fct_reviews' table and an additional column 'is_full_moon'. This column is a flag that indicates whether the review was made on a full moon day or not. If the review date matches a full moon date, the 'is_full_moon' column is marked as 'full moon', otherwise, it is marked as 'not full moon'. This model can be useful for analyzing any potential correlation between Airbnb reviews and full moon dates.
+    columns:
+      - name: review_id
+        data_type: varchar
+      - name: listing_id
+        description: This is a numeric identifier for the listing that the review is associated with. Each unique listing on the platform is assigned a unique LISTING_ID. This field is used to link the review to the specific listing that it pertains to.
+        data_type: number
+      - name: review_date
+        description: The REVIEW_DATE column represents the date when a review was made. It is of timestamp_ntz data type, which means it is a timestamp without a time zone. This date is used to determine whether the review was made on a full moon day or not. The SQL query joins the review data with a table of full moon dates, and if the review date matches a full moon date, the IS_FULL_MOON column is marked as 'full moon'. If not, it is marked as 'not full moon'.
+        data_type: timestamp_ntz
+        tests:
+          - dbt_expectations.expect_row_values_to_have_recent_data:
+              datepart: month
+              interval: 3
+      - name: reviewer_name
+        data_type: varchar
+      - name: review_text
+        data_type: varchar
+      - name: review_sentiment
+        description: This column contains the sentiment analysis result of the review text. It indicates whether the review is positive, negative, or neutral. The sentiment analysis is performed using a Natural Language Processing (NLP) algorithm that classifies the text based on the sentiment expressed in it. This column is crucial for understanding the overall sentiment of the reviews.
+        data_type: varchar
+      - name: is_full_moon
+        data_type: varchar
+  - name: test_model
+    description: "The test_model is a SQL model that combines data from two tables: dim_listings_cleansed and dim_hosts_cleansed. The model includes information about Airbnb listings and their respective hosts. The columns in the model include listing_id, listing_name, room_type, minimum_nights, price, host_id, host_name, host_is_superhost, created_at, and updated_at. The updated_at column is the most recent update from either the listings or hosts table."
